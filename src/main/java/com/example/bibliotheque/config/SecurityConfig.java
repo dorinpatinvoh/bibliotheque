@@ -1,7 +1,6 @@
 package com.example.bibliotheque.config;
 
 import com.example.bibliotheque.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,7 +10,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder; // Gardez cet import
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -20,44 +20,46 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private UserService userService; // Notre UserDetailsService personnalisé
+    // NOTE: Le @Autowired ici est optionnel dans les versions récentes de Spring
+    // si vous utilisez un constructeur, mais laissons-le pour la clarté.
+    // Assurez-vous d'avoir bien un UserService.
+    // private final UserService userService;
+    // public SecurityConfig(UserService userService) {
+    //     this.userService = userService;
+    // }
 
-    // NOUVEAU : Injectez le PasswordEncoder au lieu de le définir ici
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // CETTE MÉTHODE A ÉTÉ SUPPRIMÉE
-    /*
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    */
 
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        // MODIFIÉ : Utilisez le champ injecté au lieu d'appeler la méthode
-        authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(passwordEncoder);
-        return authenticationManagerBuilder.build();
-    }
+    // Cette méthode pour l'AuthenticationManager est pour les versions plus anciennes de Spring Boot.
+    // Avec Spring Boot 3+, il est plus simple de ne pas le définir comme un bean explicite ici
+    // car le SecurityFilterChain le configure déjà. Le code original était correct,
+    // mais celui-ci est encore plus simple et moderne.
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable) // Désactiver CSRF pour les APIs stateless
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/auth/register").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/books").permitAll()
-                .requestMatchers("/loans/**").authenticated()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(withDefaults())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                // 1. Désactiver la protection CSRF (standard pour les APIs REST stateless)
+                .csrf(AbstractHttpConfigurer::disable)
 
+                // 2. Définir les règles d'autorisation pour les requêtes HTTP
+                .authorizeHttpRequests(authz -> authz
+                        // RÈGLE CRUCIALE N°1 : Autoriser tout le monde à accéder à la console H2
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/books").permitAll()
+                        .anyRequest().authenticated() // Toutes les autres requêtes nécessitent une authentification
+                )
+
+                // 3. Activer l'authentification HTTP Basic
+                .httpBasic(withDefaults())
+
+                // 4. S'assurer que l'application est "stateless" (pas de session)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // RÈGLE CRUCIALE N°2 : Autoriser l'affichage de la console H2 dans une frame
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
