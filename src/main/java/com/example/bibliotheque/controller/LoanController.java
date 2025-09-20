@@ -3,6 +3,7 @@ package com.example.bibliotheque.controller;
 import com.example.bibliotheque.dto.LoanRequestDto;
 import com.example.bibliotheque.dto.MessageResponseDto;
 import com.example.bibliotheque.entity.Loan;
+import com.example.bibliotheque.dto.LoanResponseDto;
 import com.example.bibliotheque.service.LoanService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/loans")
+@RestController//Dit a spring cette classe est un controller web.
+@RequestMapping("/loans")//Dit tout les urls gerer par cette classe commence par /loans.
 public class LoanController {
 
     @Autowired
@@ -31,46 +32,28 @@ public class LoanController {
     }
     
     //DTO simple pour la réponse d'un prêt
-    private static class LoanResponse {
-        public Long id;
-        public Long bookId;
-        public String bookTitle;
-        public Long userId;
-        public String username;
-        public java.time.LocalDate startDate;
-        public java.time.LocalDate endDate;
-
-        public LoanResponse(Loan loan) {
-            this.id = loan.getId();
-            this.bookId = loan.getBook().getId();
-            this.bookTitle = loan.getBook().getTitle();
-            this.userId = loan.getUser().getId();
-            this.username = loan.getUser().getUsername();
-            this.startDate = loan.getStartDate();
-            this.endDate = loan.getEndDate();
-        }
-    }
 
 
-    @PostMapping
+
+    @PostMapping//Créer
     public ResponseEntity<?> borrowBook(@Valid @RequestBody LoanRequestDto loanRequestDto) {
         String username = getCurrentUsername();
         Loan loan = loanService.borrowBook(loanRequestDto.getBookId(), username);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new LoanResponse(loan));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LoanResponseDto(loan));
     }
 
-    @PutMapping("/{id}/return")
+    @PutMapping("/{id}/return")//Mettre a jour.
     public ResponseEntity<?> returnBook(@PathVariable Long id) {
         String username = getCurrentUsername();
         Loan loan = loanService.returnBook(id, username);
-        return ResponseEntity.ok(new LoanResponse(loan));
+        return ResponseEntity.ok(new LoanResponseDto(loan));
     }
 
-    @GetMapping("/my-loans")
-    public ResponseEntity<List<LoanResponse>> getMyLoans() {
+    @GetMapping("/my-loans")//Lire
+    public ResponseEntity<List<LoanResponseDto>> getMyLoans() {
         String username = getCurrentUsername();
         List<Loan> loans = loanService.getUserLoans(username);
-        List<LoanResponse> loanResponses = loans.stream().map(LoanResponse::new).collect(Collectors.toList());
+        List<LoanResponseDto> loanResponses = loans.stream().map(LoanResponseDto::new).collect(Collectors.toList());
         return ResponseEntity.ok(loanResponses);
     }
 }

@@ -18,11 +18,11 @@ public class Loan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)//Plusieurs emprunts peuvent etre lie a un utilisateur
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)//Plusieurs emprunts peuvent concerner un livre
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
@@ -31,6 +31,7 @@ public class Loan {
 
     private LocalDate endDate; // Null si le livre n'est pas encore rendu
 
+    //Initialisation des objets (this is a constructor)
     public Loan(User user, Book book, LocalDate startDate) {
         this.user = user;
         this.book = book;

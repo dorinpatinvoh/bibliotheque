@@ -3,6 +3,7 @@ package com.example.bibliotheque.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,8 +12,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "utilisateurs") // Nom de table en français
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class User {
 
@@ -36,6 +36,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Loan> loans;
 
+
+    //Initialisation des objets (this is a constructor)
     public User(String username, String password, String role) {
         this.username = username;
         this.password = password;

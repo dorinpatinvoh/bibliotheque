@@ -2,16 +2,16 @@ package com.example.bibliotheque.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;
 
-@Entity
+@Entity//cette classe représente une table dans la base de donnée
 @Table(name = "livres") // Nom de table en français
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class Book {
 
@@ -20,7 +20,7 @@ public class Book {
     private Long id;
 
     @NotBlank(message = "Le titre ne peut pas être vide")
-    @Column(nullable = false)
+    @Column(nullable = false)//elle ne peut pas etre vide
     private String title;
 
     @NotBlank(message = "L'auteur ne peut pas être vide")
@@ -32,6 +32,7 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private Set<Loan> loans;
 
+    //Initialisation des objets
     public Book(String title, String author) {
         this.title = title;
         this.author = author;

@@ -19,6 +19,7 @@ import java.util.List;
 @Service
 public class LoanService {
 
+    //@Autowired active l'injection de dépendance automatiquement.
     @Autowired
     private LoanRepository loanRepository;
 
