@@ -1,5 +1,5 @@
 
-//Ce fichier genere et valide les tokens
+//Ce fichier génère et valide les tokens
 package com.example.bibliotheque.security.jwt;
 
 import io.jsonwebtoken.Jwts;
@@ -64,11 +64,11 @@ public class JwtUtils {
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            logger.error("JWT token is expired: {}", e.getMessage());
+            logger.error("JWT token a expiré: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty: {}", e.getMessage());
+            logger.error("JWT a expiré: {}", e.getMessage());
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
         }
